@@ -51,6 +51,8 @@ def produce_sensor_data(producer, topic, data):
 def emit_data(producer, device_id, topic, sensor_data):
     for data in sensor_data:
         if data['device'] == device_id:
+            # Update the timestamp field with the current time in milliseconds
+            data['ts'] = int(time.time() * 1000)
             produce_sensor_data(producer, topic, data)
             print(f"Produced to {topic}: {data}")
             time.sleep(INTERVAL)
