@@ -2,12 +2,16 @@ version: '4.29.0'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
+    container_name: kafka
     depends_on:
       - zookeeper
     ports:
@@ -27,9 +31,9 @@ services:
 
   rest-proxy:
     image: confluentinc/cp-kafka-rest:latest
+    container_name: rest-proxy
     depends_on:
       - kafka
-      - schema-registry
     environment:
       KAFKA_REST_HOST_NAME: rest-proxy
       KAFKA_REST_BOOTSTRAP_SERVERS: kafka:29092
@@ -40,6 +44,7 @@ services:
 
   kafdrop:
     image: obsidiandynamics/kafdrop
+    container_name: kafdrop
     depends_on:
       - kafka
     ports:
@@ -47,3 +52,68 @@ services:
     environment:
       KAFKA_BROKER_CONNECT: "kafka:29092"
       JVM_OPTS: "-Xms32M -Xmx64M"
+
+  nimbus:
+    image: storm-java21
+    container_name: nimbus
+    command: storm nimbus
+    environment:
+      - NIMBUS_SEEDS=nimbus
+    ports:
+      - "6627:6627"
+      - "8081:8080"
+    depends_on:
+      - zookeeper
+
+  supervisor:
+    image: storm-java21
+    container_name: supervisor
+    command: storm supervisor
+    environment:
+      - NIMBUS_SEEDS=nimbus
+    depends_on:
+      - zookeeper
+      - nimbus
+
+  ui:
+    image: storm-java21
+    container_name: storm_ui
+    command: storm ui
+    environment:
+      - NIMBUS_SEEDS=nimbus
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nimbus
+
+  sensor-data:
+    image: influxdb:2.7.6
+    container_name: sensor-data
+    environment:
+      - INFLUXDB_INIT_USERNAME=admin
+      - INFLUXDB_INIT_PASSWORD=admin
+      - INFLUXDB_INIT_ORG=admin
+      - INFLUXDB_INIT_BUCKET=sensor-data
+      - INFLUXDB_INIT_ADMIN_TOKEN=token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - sensor-data
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+
+volumes:
+  influxdb_data:
+  grafana_data:

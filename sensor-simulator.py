@@ -5,7 +5,7 @@ from confluent_kafka import Producer, KafkaException
 import json
 import threading
 
-KAFKA_BROKER = 'localhost:9092'  # Ensure this is set to localhost
+KAFKA_BROKER = 'localhost:9092'
 CSV_FILE = 'data/iot_telemetry_data.csv'
 INTERVAL = 1  # seconds
 
