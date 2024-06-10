@@ -87,18 +87,17 @@ services:
       - nimbus
 
   sensor-data:
-    image: influxdb:2.7.6
+    image: influxdb:2.7.6-alpine
     container_name: sensor-data
     environment:
       - INFLUXDB_INIT_USERNAME=admin
       - INFLUXDB_INIT_PASSWORD=admin
       - INFLUXDB_INIT_ORG=admin
       - INFLUXDB_INIT_BUCKET=sensor-data
-      - INFLUXDB_INIT_ADMIN_TOKEN=token
     ports:
       - "8086:8086"
-    volumes:
-      - influxdb_data:/var/lib/influxdb
+    # volumes:
+      # - influxdb_data:/var/lib/influxdb
 
   grafana:
     image: grafana/grafana:latest
@@ -110,10 +109,23 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=viewer
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
 
+  redis:
+      image: redis:7.0.15-alpine
+      container_name: redis
+      ports:
+        - "6379:6379"
+      volumes:
+        - redis_data:/data
+
 volumes:
   influxdb_data:
   grafana_data:
+  redis_data:

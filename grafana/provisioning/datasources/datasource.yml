@@ -13,5 +13,3 @@ datasources:
       defaultBucket: sensor-data
       organization: admin
       version: Flux
-    secureJsonData:
-      token: RBvme3xYoZK52px6srfwTA0_jt4sdqT96HBctCBwi_7lhj46Sivpc6YQcL4JG6BJf7wxLYLo1pxPpzdYQtE0Tg==
