@@ -65,9 +65,19 @@ services:
     depends_on:
       - zookeeper
 
-  supervisor:
+  supervisor1:
     image: storm-java21
-    container_name: supervisor
+    container_name: supervisor1
+    command: storm supervisor
+    environment:
+      - NIMBUS_SEEDS=nimbus
+    depends_on:
+      - zookeeper
+      - nimbus
+
+  supervisor2:
+    image: storm-java21
+    container_name: supervisor2
     command: storm supervisor
     environment:
       - NIMBUS_SEEDS=nimbus
@@ -126,6 +136,13 @@ services:
       - redis_data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+  maildev:
+    image: maildev/maildev:2.1.0
+    container_name: maildev
+    ports:
+      - "1080:1080"  # Port for MailDev web interface
+      - "1025:1025"  # Port for MailDev SMTP server
 
 volumes:
   grafana_data:

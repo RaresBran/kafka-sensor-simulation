@@ -1,15 +1,15 @@
 apiVersion: 1
 
 datasources:
-  - name: InfluxDB
-    type: influxdb
+  - name: timescaledb-sensor-data
+    type: postgres
     access: proxy
-    url: http://sensor-data:8086
+    url: timescaledb:5432
     isDefault: true
     database: sensor-data
     user: admin
     password: admin
     jsonData:
-      defaultBucket: sensor-data
-      organization: admin
-      version: Flux
+      sslmode: disable
+    secureJsonData:
+      password: admin
