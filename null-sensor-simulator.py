@@ -49,13 +49,20 @@ def produce_sensor_data(producer, topic, data):
     producer.flush()
 
 def emit_data(producer, device_id, topic, sensor_data):
+    count = 0
     for data in sensor_data:
         if data['device'] == device_id:
             # Update the timestamp field with the current time in milliseconds
             data['ts'] = int(time.time() * 1000)
+            
+            # Introduce a null value in the temp column every 10 rows
+            if device_id == "00:0f:00:70:91:0a" and count % 10 == 9:
+                data['temp'] = None
+            
             produce_sensor_data(producer, topic, data)
             # print(f"Produced to {topic}: {data}")
             time.sleep(INTERVAL)
+            count += 1
 
 def main():
     if not check_kafka_connection(KAFKA_BROKER):
